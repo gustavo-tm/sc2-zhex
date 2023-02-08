@@ -22,12 +22,14 @@ class Game:
 
     def calc_income(self):
 
-        self.income = (
+        self.income_m = (
             self.start_config["income_flat"] + (
                 sum([built_spawner.built for built_spawner in self.buildings if built_spawner.type == 1]) + self.start_config["spawner_buff"]
             ) * sum([built_extractor.built for built_extractor in self.buildings if built_extractor.type == 0])
         )
 
+        self.income_s = self.income_m / 60
+        
     def build(self, building):
         
         self.buildings.append(Building(self.building_configs[building]))
@@ -35,16 +37,39 @@ class Game:
         self.supply -= self.building_configs[building]["cost_sup"]
 
     def skipm(self, minerals):
-        pass
 
-    def skipt(self, time, show = False):
-        while time != 0:
-
+        while minerals != 0:
+            time = minerals / self.income_s
+            
             sinal = time/abs(time)
+            
             time_skip = (
                 min([abs(building.time) for building in self.buildings 
                 if building.built != (time > 0)] + [abs(time)]) #if time skip is forward in time, only unbuilt structures will be considered
             ) * sinal
+
+            for building in self.buildings:
+                building.time += time_skip
+                if building.time == 0:
+                    building.built = bool((building.built + 1) % 2) #built structures will get unbuilt and unbuilt structures will be built 
+            
+            minerals -= self.income_s * time_skip
+            self.minerals += self.income_s * time_skip
+
+            self.calc_income()
+
+            print("skipped time ", time_skip)   
+
+    def skipt(self, time, show = False):
+
+        while time != 0:
+            sinal = time/abs(time)
+
+            time_skip = (
+                min([abs(building.time) for building in self.buildings 
+                if building.built != (time > 0)] + [abs(time)]) #if time skip is forward in time, only unbuilt structures will be considered
+            ) * sinal
+
             for building in self.buildings:
                 building.time += time_skip
                 if building.time == 0:
@@ -53,10 +78,11 @@ class Game:
             time -= time_skip
 
             self.time += time_skip
-            self.minerals += self.income * time_skip
+            self.minerals += self.income_s * time_skip
             self.calc_income()
 
             print("skipped time ", time_skip)     
+
 
 class Building:
 
