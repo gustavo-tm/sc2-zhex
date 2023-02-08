@@ -38,7 +38,6 @@ class Game:
         pass
 
     def skipt(self, time, show = False):
-
         while time != 0:
 
             sinal = time/abs(time)
@@ -48,14 +47,16 @@ class Game:
             ) * sinal
             for building in self.buildings:
                 building.time += time_skip
-                if building.time == time_skip:
-                    building.built = (building.built + 1) % 2 #built structures will get unbuilt and unbuilt structures will be built 
+                if building.time == 0:
+                    building.built = bool((building.built + 1) % 2) #built structures will get unbuilt and unbuilt structures will be built 
             
-            self.time += time_skip
             time -= time_skip
-            print(time_skip)
-        
+
+            self.time += time_skip
+            self.minerals += self.income * time_skip
             self.calc_income()
+
+            print("skipped time ", time_skip)     
 
 class Building:
 
@@ -67,9 +68,9 @@ class Building:
 
         if insta_build:
             self.time = 0
+            self.built = True
         else:
             self.time = -building_configs["build_time"]
-
-        self.built = self.time >= 0 
+            self.built = False
 
 game = Game()
