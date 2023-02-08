@@ -1,0 +1,8 @@
+{
+    "supply_cost": 600,
+    "supply": 54,
+    "extractors": 12,
+    "spawners": 24,
+    "income_flat": 160,
+    "spawner_buff": 30
+}

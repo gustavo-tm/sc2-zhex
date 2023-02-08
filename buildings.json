@@ -1,0 +1,20 @@
+{
+    "slow":{
+        "cost_min": 70,
+        "cost_sup": 4,
+        "eco_type": 1,
+        "build_time": 20
+    },
+    "strike":{
+        "cost_min": 90,
+        "cost_sup": 3,
+        "eco_type": 1,
+        "build_time": 25
+    },
+    "extractor":{
+        "cost_min": 220,
+        "cost_sup": 15,
+        "eco_type": 0,
+        "build_time": 30
+    }
+}
