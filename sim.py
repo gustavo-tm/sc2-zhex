@@ -37,8 +37,38 @@ class Game:
     def skipm(self, minerals):
         pass
 
-    def skipt(self, time):
-        pass
+    def skipt(self, time, show = False):
+
+        while time != 0:
+
+            sinal = time/abs(time)
+
+            self.time_2change = min([-sinal * building.time for building in self.buildings if -sinal * building.time <= 0])
+
+            if abs(time) < self.time_2change:
+                self.time += time
+                self.minerals += time * self.income/60
+                for building in self.buildings:
+                    building.time += time
+                    building.built = building.time >= 0
+            
+                if show:
+                    print("skipped ", self.time)
+
+                time = 0
+
+            else:
+                self.time += self.time_2change
+                time +=  self.time_2change * -sinal
+                for building in self.buildings:
+                    building.time += self.time_2change
+                    if building.time == 0:
+                        building.built = (building.built + 1) % 2
+               
+                if show:
+                    print("skipped ", self.time_2change, "\n changed built state of structure")
+        print(time)
+        self.calc_income()
 
 class Building:
 
