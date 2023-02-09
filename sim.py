@@ -29,6 +29,12 @@ class Game:
         )
 
         self.income_s = self.income_m / 60
+
+    def buy_supply(self):
+        self.minerals -= self.supply_cost
+        self.supply += 45
+        self.supply_cost += 125 * (self.nsupply % 2)
+        self.nsupply += 1
         
     def build(self, building):
         
