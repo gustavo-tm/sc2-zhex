@@ -6,7 +6,7 @@ The script, unlike its predecessor, does not work with a simulation tickspeed, i
 
 $$ income_\text{minute} = 160+\text{extractors}\cdot(30+\text{spawners}) $$
 
-### **Available features**
+### **Available commands and attributes**
 - ```Game.build(spawner)```: creates a new structure object, could be a slowling, strikeling or extractor. Structures settings are already built-in. More structures will be added;
 - ```Game.skipt(time)```: skips an amount of time to the future. Structures that are being built will finish building, the income will be updated and the amount of minerals will be adjused accordingly;
 - ```Game.skipm(minerals)```: just like skipping time, it is possible to skip a certain amount of minerals to the future.
@@ -14,6 +14,7 @@ $$ income_\text{minute} = 160+\text{extractors}\cdot(30+\text{spawners}) $$
 - ```Game.save_history(name)```: saves the build order to a .txt file
 - ```Game.load_history(name)```: loads the build order from an available .txt file on the computer that meets the structure of the history (for instance a build order saved previously)
 - ```Game.show ```: When set to "True" (default value), all commands will output a change log along with more informations that could help making the next decision
+- ```Game.auto_skip ```: If set to "True" (default value), when there are not enough resources for a command, the script automatically skips in time and aquire those resources
 
 ### *Known issues*
 - None

@@ -2,7 +2,7 @@ import json
 
 class Game:
 
-    def __init__(self, show = True, history = []):
+    def __init__(self, show = True, history = [], auto_skip = True):
 
         self.time = 0
         self.minerals = 0
@@ -25,7 +25,8 @@ class Game:
         self.save = False
         self.history = history
         self.run_history()
-
+        
+        self.auto_skip = auto_skip
         self.show = show
 
     def run_history(self):
@@ -91,11 +92,14 @@ class Game:
                 Next supply cost: {self.supply_cost}
                 Available minerals: {round(self.minerals, 2)}
                 """)
-        else: print(f"""
-            Not enough resources.
-            Available minerals: {self.minerals}
-            Required minerals: {self.supply_cost}
+        else: 
+            print(f"""
+                Not enough resources.
+                Available minerals: {self.minerals}
+                Required minerals: {self.supply_cost}
             """)
+            if self.auto_skip:
+                self.skipm(self.supply_cost - self.minerals)
         
     def build(self, building):
         cost_min = self.building_configs[building]["cost_min"]
@@ -110,13 +114,20 @@ class Game:
                 Updated mineral balance: {self.minerals}
                 Updated supply balance: {self.supply}
                 """)
-        else: print(f"""
-            Not enough resources.
-            Available minerals: {self.minerals}
-            Required minerals: {cost_min}
-            Available supply: {self.supply}
-            Required supply: {cost_sup}
+        else: 
+            print(f"""
+                Not enough resources.
+                Available minerals: {self.minerals}
+                Required minerals: {cost_min}
+                Available supply: {self.supply}
+                Required supply: {cost_sup}
             """)
+            if self.auto_skip:
+                if self.supply <= cost_sup:
+                    self.buy_supply()
+                if self.minerals <= cost_min:
+                    self.skipm(cost_min - self.minerals)
+                self.build(building)
 
     def skipm(self, minerals):
 
@@ -189,4 +200,3 @@ class Building:
             self.built = False
 
 game = Game()
-game.skipt(60)
