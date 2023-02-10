@@ -17,7 +17,7 @@ $$ income_\text{minute} = 160+\text{extractors}\cdot(30+\text{spawners}) $$
 - ```Game.auto_skip ```: If set to "True" (default value), when there are not enough resources for a command, the script automatically skips in time and aquire those resources
 
 ### *Known issues*
-- None
+- No strikeling limit
 
 ### *Planned Features*
 - Clone current state: In order to compare two different choices, it would be good to work on them side by side from a point in time, so cloning a current state would make that easier;

@@ -1,7 +1,6 @@
 import json
 
 class Game:
-
     def __init__(self, show = True, history = [], auto_skip = True):
 
         self.time = 0
@@ -28,6 +27,8 @@ class Game:
         
         self.auto_skip = auto_skip
         self.show = show
+        self.auto_building = False
+
 
     def run_history(self):
 
@@ -59,6 +60,13 @@ class Game:
         self.__init__(history = history)
         if self.show: print(f"Loaded build order from {name}.txt")
 
+    def auto_build(self, condition):
+        self.auto_building = True
+        self.calc_ratio()
+        while condition:
+            self.build(self.suggestion)
+        self.auto_building = False
+
     def calc_income(self):
 
         previous_income = self.income_m
@@ -75,6 +83,31 @@ class Game:
             New income: {self.income_m}
             Income change: {self.income_m - previous_income}
             """)
+
+    def calc_ratio(self):
+        marginal_gain_extractor = len([building for building  in self.buildings if building .type == 1]) + self.start_config["spawner_buff"]
+        marginal_gain_spawner = len([building for building  in self.buildings if building .type == 0])
+
+        marginal_cost_extractor = (self.building_configs["extractor"]["cost_min"] + 
+            (self.building_configs["extractor"]["cost_sup"] / 45) * self.supply_cost)
+
+        min_marginal_cost_spawner, min_marginal_cost = ("", 0) 
+        for structure in [building for building in self.building_configs.keys() if building != "extractor"]:
+            marginal_cost = (self.building_configs[structure]["cost_min"] + (self.building_configs[structure]["cost_sup"] / 45) * self.supply_cost)
+            if min_marginal_cost == 0 or min_marginal_cost > marginal_cost:
+                min_marginal_cost = marginal_cost
+                min_marginal_cost_spawner = structure
+
+        ROI_extractor = marginal_gain_extractor / marginal_cost_extractor
+        ROI_spawner = marginal_gain_spawner / min_marginal_cost
+        
+        if self.show: print(f"""
+            Extractor's ROI: {round(ROI_extractor, 2)}
+            Spawner's ROI: {round(ROI_spawner, 2)}
+            Cheapest spawner: {min_marginal_cost_spawner}
+            """)
+
+        self.suggestion = min_marginal_cost_spawner if ROI_spawner > ROI_extractor else "extractor"
 
     def buy_supply(self):
         if self.minerals >= self.supply_cost:
@@ -128,6 +161,8 @@ class Game:
                 if self.minerals <= cost_min:
                     self.skipm(cost_min - self.minerals)
                 self.build(building)
+
+        if self.show or self.auto_building: self.calc_ratio()
 
     def skipm(self, minerals):
 
@@ -184,7 +219,6 @@ class Game:
 
 
 class Building:
-
     def __init__(self, building_configs, name, insta_build = False):
 
         self.name = name
