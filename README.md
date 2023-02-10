@@ -21,7 +21,6 @@ $$ income_\text{minute} = 160+\text{extractors}\cdot(30+\text{spawners}) $$
 
 ### *Planned Features*
 - Clone current state: In order to compare two different choices, it would be good to work on them side by side from a point in time, so cloning a current state would make that easier;
-- Make build requests: Instead of skipping time and building, a building request and buffer could make it simpler to create an actual build;
 - Add inteligence: Working towards the same direction as the previous iteration of the zerg hex simulator, some kind of intelligence that would tell what choice yieds the most income in the long run would be very nice;
 - Add analysis: Would be great to visualize the timeline in some kind of plot and add statistics, for instance how much the user deviates from the optimal eco build and how much aggressive potential that build presents on each stage of the game, etc;
 - Move the interface to somewhere more user-friendly
