@@ -1,4 +1,29 @@
 import json
+import streamlit as st
+
+
+def run():
+
+    st.set_page_config(page_title='Notas', layout='wide', )
+
+    if "game" not in st.session_state:
+        st.session_state.game = Game()
+
+    buildings = {building.capitalize(): building for building in st.session_state.game.building_configs.keys()}
+    buildings.update({f"Suggestion ({st.session_state.game.suggestion})": st.session_state.game.suggestion})
+    building = st.sidebar.selectbox(
+        "Choose what building to construct",
+        buildings.keys()
+    )
+
+    st.sidebar.button("Build", on_click = st.session_state.game.build, args = (buildings[building],))
+
+    st.sidebar.markdown("---")
+
+    undos = st.sidebar.number_input("Number of undos", 1)
+    st.sidebar.button(f"Undo {undos} change(s)", on_click = st.session_state.game.undo, args = (undos, ))
+
+    st.session_state
 
 class Game:
     def __init__(self, show = True, history = [], auto_skip = True):
@@ -20,6 +45,7 @@ class Game:
 
         self.income_m = 0
         self.calc_income()
+        self.calc_ratio()
 
         self.save = False
         self.history = history
@@ -27,7 +53,7 @@ class Game:
         
         self.auto_skip = auto_skip
         self.show = show
-
+        self.history_supply
 
     def run_history(self):
 
@@ -139,6 +165,11 @@ class Game:
                 Updated mineral balance: {self.minerals}
                 Updated supply balance: {self.supply}
                 """)
+            if self.nsupply not in self.history_supply:
+                self.history_supply.update(building)
+            else:
+                self.history_supply[self.nsupply].append(building)
+            
         else: 
             print(f"""
                 Not enough resources.
@@ -225,4 +256,4 @@ class Building:
             self.time = -building_configs["build_time"]
             self.built = False
 
-game = Game()
+run()
