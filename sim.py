@@ -27,7 +27,6 @@ class Game:
         
         self.auto_skip = auto_skip
         self.show = show
-        self.auto_building = False
 
 
     def run_history(self):
@@ -59,13 +58,6 @@ class Game:
         history = eval(open(f'{name}.txt','r').read())
         self.__init__(history = history)
         if self.show: print(f"Loaded build order from {name}.txt")
-
-    def auto_build(self, condition):
-        self.auto_building = True
-        self.calc_ratio()
-        while condition:
-            self.build(self.suggestion)
-        self.auto_building = False
 
     def calc_income(self):
 
@@ -162,7 +154,7 @@ class Game:
                     self.skipm(cost_min - self.minerals)
                 self.build(building)
 
-        if self.show or self.auto_building: self.calc_ratio()
+        if self.show: self.calc_ratio()
 
     def skipm(self, minerals):
 
