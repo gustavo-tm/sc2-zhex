@@ -23,7 +23,7 @@ def run():
     undos = st.sidebar.number_input("Number of undos", 1)
     st.sidebar.button(f"Undo {undos} change(s)", on_click = st.session_state.game.undo, args = (undos, ))
 
-    st.session_state
+    st.session_state.game.__dict__
 
 class Game:
     def __init__(self, show = True, history = [], auto_skip = True):
@@ -53,7 +53,7 @@ class Game:
         
         self.auto_skip = auto_skip
         self.show = show
-        self.history_supply
+        self.history_supply = {}
 
     def run_history(self):
 
@@ -166,7 +166,7 @@ class Game:
                 Updated supply balance: {self.supply}
                 """)
             if self.nsupply not in self.history_supply:
-                self.history_supply.update(building)
+                self.history_supply.update({self.nsupply: [building]})
             else:
                 self.history_supply[self.nsupply].append(building)
             
