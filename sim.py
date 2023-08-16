@@ -1,29 +1,39 @@
 import json
 import streamlit as st
+import plotly.express as px
 
-
-def run():
+def run(show = True):
 
     st.set_page_config(page_title='Notas', layout='wide', )
 
     if "game" not in st.session_state:
-        st.session_state.game = Game()
+        st.session_state.game = Game(show = show)
 
-    buildings = {building.capitalize(): building for building in st.session_state.game.building_configs.keys()}
-    buildings.update({f"Suggestion ({st.session_state.game.suggestion})": st.session_state.game.suggestion})
+    buildings = {"Suggestion": st.session_state.game.suggestion}
+    buildings.update({building.capitalize(): building for building in st.session_state.game.building_configs.keys()})
+
     building = st.sidebar.selectbox(
         "Choose what building to construct",
         buildings.keys()
     )
 
+    st.sidebar.write(f"Current suggestion: {st.session_state.game.suggestion}")
     st.sidebar.button("Build", on_click = st.session_state.game.build, args = (buildings[building],))
 
     st.sidebar.markdown("---")
 
     undos = st.sidebar.number_input("Number of undos", 1)
-    st.sidebar.button(f"Undo {undos} change(s)", on_click = st.session_state.game.undo, args = (undos, ))
+    st.sidebar.button(f"Undo {undos} change(s)", on_click = st.session_state.game.undo, args = (undos, ))-+
 
+    plot()
     st.session_state.game.__dict__
+
+def plot():
+    data = st.session_state.game.history_income
+    fig = px.line(x= data.keys(), y= data.values(), title='Income (minerals/minute)')
+
+    st.plotly_chart(fig)
+
 
 class Game:
     def __init__(self, show = True, history = [], auto_skip = True):
@@ -32,6 +42,8 @@ class Game:
         self.minerals = 0
         self.nsupply = 0
         self.show = False
+        self.history_supply = {}
+        self.history_income = {}
 
         self.building_configs = json.loads(open("buildings.json").read())
         self.start_config = json.loads(open("start_config.json").read())
@@ -53,12 +65,15 @@ class Game:
         
         self.auto_skip = auto_skip
         self.show = show
-        self.history_supply = {}
+
 
     def run_history(self):
 
         for command in self.history:
-            eval(command[0])(command[1])
+            if command[1] != "":
+                eval(command[0])(command[1])
+            else:
+                eval(command[0])
         self.save = True
         if self.show: print(f"""
             Current status
@@ -96,6 +111,8 @@ class Game:
 
         self.income_s = self.income_m / 60
 
+        self.history_income.update({self.time: self.income_m})
+        self.calc_ratio()
         if self.show: print(f"""
             Previous income: {previous_income}
             New income: {self.income_m}
@@ -133,7 +150,7 @@ class Game:
             self.supply += 45
             self.supply_cost += 125 * (self.nsupply % 2)
             self.nsupply += 1
-            self.history.append(("self.buy_supply()", None))
+            if self.save: self.history.append(("self.buy_supply()", ""))
             if self.show: print(f"""
                 Bought new supply.
                 Time (s): {round(self.time, 2)}, Time (m): {round(self.time / 60, 2)}
@@ -256,4 +273,4 @@ class Building:
             self.time = -building_configs["build_time"]
             self.built = False
 
-run()
+run(show = False)
