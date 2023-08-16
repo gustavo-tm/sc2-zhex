@@ -118,7 +118,7 @@ class Game:
                 Available minerals: {round(self.minerals, 2)}
                 """)
         else: 
-            print(f"""
+            if self.show: print(f"""
                 Not enough resources.
                 Available minerals: {self.minerals}
                 Required minerals: {self.supply_cost}
@@ -140,7 +140,7 @@ class Game:
                 Updated supply balance: {self.supply}
                 """)
         else: 
-            print(f"""
+            if self.show: print(f"""
                 Not enough resources.
                 Available minerals: {self.minerals}
                 Required minerals: {cost_min}
