@@ -1,4 +1,5 @@
 import json
+import gym
 
 class Game:
     def __init__(self, show = True, history = [], auto_skip = True):
@@ -228,4 +229,28 @@ class Building:
             self.time = -building_configs["build_time"]
             self.built = False
 
-game = Game()
+class Environment(gym.Env):
+    def __init__(self, render_mode = None):
+        self.actions = {
+            0: "slow",
+            1: "extractor"
+        }
+
+    def reset(self, seed = None):
+        self.game = Game(show = True)
+
+    def step(self, action):
+        old_score = self.game.income_m
+        self.game.build(self.actions[action])
+        reward = self.game.income_m - old_score
+        observation = np.array([
+            self.game.income_m,
+            self.game.nstructures_type0,
+            self.game.nstructures_type1,
+            self.game.supply,
+            self.game.supply_cost,
+            self.game.nsupply
+        ])
+        terminated = self.game.time > 600
+        info = {self.game.time}
+        return observation, reward, terminated, False, info
