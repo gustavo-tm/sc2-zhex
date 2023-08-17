@@ -62,10 +62,12 @@ class Game:
     def calc_income(self):
 
         previous_income = self.income_m
+
+        self.nstructures_type0 = len([structure for structure in self.buildings if structure.type == 0])
+        self.nstructures_type1 = len([structure for structure in self.buildings if structure.type == 1])
+
         self.income_m = (
-            self.start_config["income_flat"] + (
-                sum([built_spawner.built for built_spawner in self.buildings if built_spawner.type == 1]) + self.start_config["spawner_buff"]
-            ) * sum([built_extractor.built for built_extractor in self.buildings if built_extractor.type == 0])
+            self.start_config["income_flat"] + (self.nstructures_type1 + self.start_config["spawner_buff"]) * self.nstructures_type0
         )
 
         self.income_s = self.income_m / 60
