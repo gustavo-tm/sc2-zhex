@@ -125,6 +125,7 @@ class Game:
             """)
             if self.auto_skip:
                 self.skipm(self.supply_cost - self.minerals)
+                self.buy_supply()
         
     def build(self, building):
         cost_min = self.building_configs[building]["cost_min"]
