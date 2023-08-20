@@ -4,7 +4,7 @@ from game import Game
 import random
 
 class Environment(gym.Env):
-    def __init__(self, render_mode = None, default_settings = True, print_build = False, max_time = 600):
+    def __init__(self, render_mode = None, default_settings = True, print_build = False, max_time = 600, termination_type = "income", termination_value = 6000):
         self.actions = {
             0: "slow",
             1: "extractor",
@@ -14,6 +14,12 @@ class Environment(gym.Env):
         self.print_build = print_build
         self.max_time = max_time
 
+        self.termination = {
+            "custom": termination_value,
+            "income": f"self.game.income_m > {termination_value}",
+            "time": f"self.game.time > {termination_value}"
+        }[termination_type] + " or self.game.nstrikes > 60"
+
     def observe(self):
         observation = np.array([
             self.game.income_m,
@@ -22,7 +28,7 @@ class Environment(gym.Env):
             self.game.supply,
             self.game.supply_cost,
             self.game.nsupply,
-            #under construction
+            self.game.nstrikes
         ])
 
         return observation
@@ -42,16 +48,20 @@ class Environment(gym.Env):
             }
             self.game = Game(show = show, start_config = start_configs)
 
+        self.history = []
+
         return self.observe()
 
     def step(self, action):
         old_score = self.game.income_m
         self.game.build(self.actions[action])
         reward = self.game.income_m - old_score
-        terminated = self.game.time > self.max_time
+        terminated = eval(self.termination)
         info = {"time": self.game.time}
 
         if self.print_build:
             print(action)
+
+        self.history.append(action)
 
         return self.observe(), reward, terminated, info

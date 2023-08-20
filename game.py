@@ -17,7 +17,7 @@ class Building:
             self.built = False
 
 class Game:
-    def __init__(self, show = True, auto_skip = True, start_config = json.loads(open("start_config.json").read())):
+    def __init__(self, show = False, auto_skip = True, start_config = json.loads(open("start_config.json").read())):
 
         self.time = 0
         self.minerals = 0
@@ -33,6 +33,7 @@ class Game:
             [Building(self.building_configs["extractor"], "extractor", insta_build = True) for _ in range(self.start_config["extractors"])] +
             [Building(self.building_configs["slow"], "slow", insta_build = True) for _ in range(self.start_config["spawners"])]
         )
+        self.nstrikes = 0
 
         self.income_m = 0
         self.calc_income()
@@ -115,6 +116,7 @@ class Game:
         cost_sup = self.building_configs[building]["cost_sup"]
         if round(self.minerals, 40) >= cost_min and self.supply >= cost_sup:
             self.buildings.append(Building(self.building_configs[building], building))
+            self.nstrikes += 1
             self.minerals -= cost_min
             self.supply -= cost_sup
             if self.show: print(f"""
