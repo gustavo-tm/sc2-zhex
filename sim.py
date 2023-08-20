@@ -106,7 +106,7 @@ class Game:
         self.suggestion = min_marginal_cost_spawner if ROI_spawner > ROI_extractor else "extractor"
 
     def buy_supply(self):
-        if self.minerals >= self.supply_cost:
+        if round(self.minerals, 40) >= self.supply_cost:
             self.minerals -= self.supply_cost
             self.supply += 45
             self.supply_cost += 125 * (self.nsupply % 2)
@@ -134,7 +134,7 @@ class Game:
     def build(self, building):
         cost_min = self.building_configs[building]["cost_min"]
         cost_sup = self.building_configs[building]["cost_sup"]
-        if self.minerals >= cost_min and self.supply >= cost_sup:
+        if round(self.minerals, 40) >= cost_min and self.supply >= cost_sup:
             self.buildings.append(Building(self.building_configs[building], building))
             self.minerals -= cost_min
             self.supply -= cost_sup
@@ -155,7 +155,7 @@ class Game:
             if self.auto_skip:
                 if self.supply <= cost_sup:
                     self.buy_supply()
-                if self.minerals <= cost_min:
+                if self.minerals < cost_min:
                     self.skipm(cost_min - self.minerals)
                 self.build(building)
 
@@ -164,9 +164,14 @@ class Game:
     def skipm(self, minerals):
 
         if self.save: self.history.append(("self.skipm", minerals))
-        while minerals > 0:
+        while round(minerals, 39) > 0:
             time = minerals / self.income_s
             minerals -= self.skip(time)[1]
+            if self.show: print(f"""
+                Is skipping minerals.
+                Minerals left: {minerals}
+                Mineral balance: {round(self.minerals, 10)}
+            """) 
 
         
         if self.show: print(f"""
@@ -178,7 +183,7 @@ class Game:
     def skipt(self, time):
 
         if self.save: self.history.append(("self.skipt", time))
-        while time > 0:
+        while round(time, 39) > 0:
             time -= self.skip(time)[0]
 
         if self.show: print(f"""
@@ -190,7 +195,7 @@ class Game:
     def skip(self, time):
         time_skip = (
                 min([abs(building.time) for building in self.buildings 
-                if building.built == False] + [time])) 
+                if building.built == False and building.time != 0] + [time])) 
         mineral_skip = self.income_s * time_skip
 
         change = False
@@ -238,8 +243,8 @@ class Environment(gym.Env):
             1: "extractor"
         }
 
-    def reset(self, seed = None):
-        self.game = Game(show = False)
+    def reset(self, seed = None, show = False):
+        self.game = Game(show = show)
 
     def step(self, action):
         old_score = self.game.income_m
