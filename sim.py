@@ -205,13 +205,7 @@ class Environment(gym.Env):
             1: "extractor"
         }
 
-    def reset(self, seed = None, show = False):
-        self.game = Game(show = show)
-
-    def step(self, action):
-        old_score = self.game.income_m
-        self.game.build(self.actions[action])
-        reward = self.game.income_m - old_score
+    def observe(self):
         observation = np.array([
             self.game.income_m,
             self.game.nstructures_type0,
@@ -220,6 +214,17 @@ class Environment(gym.Env):
             self.game.supply_cost,
             self.game.nsupply
         ])
+
+        return observation
+
+    def reset(self, seed = None, show = False):
+        self.game = Game(show = show)
+        return self.observe()
+
+    def step(self, action):
+        old_score = self.game.income_m
+        self.game.build(self.actions[action])
+        reward = self.game.income_m - old_score
         terminated = self.game.time > 600
-        info = {self.game.time}
-        return observation, reward, terminated, False, info
+        info = {"time": self.game.time}
+        return self.observe(), reward, terminated, info
