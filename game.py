@@ -1,9 +1,23 @@
 import json
-import gym
 import numpy as np
 
+class Building:
+    def __init__(self, building_configs, name, insta_build = False):
+
+        self.name = name
+        self.type = building_configs["eco_type"]
+        self.cost_min = building_configs["cost_min"]
+        self.cost_sup = building_configs["cost_sup"]
+
+        if insta_build:
+            self.time = 0
+            self.built = True
+        else:
+            self.time = -building_configs["build_time"]
+            self.built = False
+
 class Game:
-    def __init__(self, show = True, auto_skip = True):
+    def __init__(self, show = True, auto_skip = True, start_config = json.loads(open("start_config.json").read())):
 
         self.time = 0
         self.minerals = 0
@@ -11,7 +25,7 @@ class Game:
         self.show = False
 
         self.building_configs = json.loads(open("buildings.json").read())
-        self.start_config = json.loads(open("start_config.json").read())
+        self.start_config = start_config
 
         self.supply = self.start_config["supply"]
         self.supply_cost = self.start_config["supply_cost"]
@@ -117,7 +131,7 @@ class Game:
                 Required supply: {cost_sup}
             """)
             if self.auto_skip:
-                if self.supply <= cost_sup:
+                if self.supply < cost_sup:
                     self.buy_supply()
                 if self.minerals < cost_min:
                     self.skipm(cost_min - self.minerals)
@@ -181,50 +195,3 @@ class Game:
             """)
 
         return time_skip, mineral_skip
-
-
-class Building:
-    def __init__(self, building_configs, name, insta_build = False):
-
-        self.name = name
-        self.type = building_configs["eco_type"]
-        self.cost_min = building_configs["cost_min"]
-        self.cost_sup = building_configs["cost_sup"]
-
-        if insta_build:
-            self.time = 0
-            self.built = True
-        else:
-            self.time = -building_configs["build_time"]
-            self.built = False
-
-class Environment(gym.Env):
-    def __init__(self, render_mode = None):
-        self.actions = {
-            0: "slow",
-            1: "extractor"
-        }
-
-    def observe(self):
-        observation = np.array([
-            self.game.income_m,
-            self.game.nstructures_type0,
-            self.game.nstructures_type1,
-            self.game.supply,
-            self.game.supply_cost,
-            self.game.nsupply
-        ])
-
-        return observation
-
-    def reset(self, seed = None, show = False):
-        self.game = Game(show = show)
-        return self.observe()
-
-    def step(self, action):
-        old_score = self.game.income_m
-        self.game.build(self.actions[action])
-        reward = self.game.income_m - old_score
-        terminated = self.game.time > 600
-        info = {"time": self.game.time}
-        return self.observe(), reward, terminated, info
