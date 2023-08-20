@@ -3,7 +3,7 @@ import gym
 import numpy as np
 
 class Game:
-    def __init__(self, show = True, history = [], auto_skip = True):
+    def __init__(self, show = True, auto_skip = True):
 
         self.time = 0
         self.minerals = 0
@@ -23,43 +23,9 @@ class Game:
         self.income_m = 0
         self.calc_income()
 
-        self.save = False
-        self.history = history
-        self.run_history()
         
         self.auto_skip = auto_skip
         self.show = show
-
-
-    def run_history(self):
-
-        for command in self.history:
-            eval(command[0])(command[1])
-        self.save = True
-        if self.show: print(f"""
-            Current status
-            Time (s): {round(self.time, 2)}, Time (m): {round(self.time / 60, 2)}
-            Mineral balance: {round(self.minerals, 2)}
-            Supply balance: {round(self.supply, 2)}
-            Income: {round(self.income_m, 2)}
-            """)
-
-
-    def undo(self, changes = 1):
-        for _ in range(changes):
-            self.history.pop()
-        self.__init__(history = self.history)
-        if self.show: print(f"{changes} change(s) undone.")
-
-    def save_history(self, name = "build_order"):
-        with open(f'{name}.txt', 'w') as history:
-            history.write(str(self.history))
-        if self.show: print(f"Saved build order to {name}.txt")
-
-    def load_history(self, name = "build_order"):
-        history = eval(open(f'{name}.txt','r').read())
-        self.__init__(history = history)
-        if self.show: print(f"Loaded build order from {name}.txt")
 
     def calc_income(self):
 
@@ -111,7 +77,6 @@ class Game:
             self.supply += 45
             self.supply_cost += 125 * (self.nsupply % 2)
             self.nsupply += 1
-            self.history.append(("self.buy_supply()", None))
             if self.show: print(f"""
                 Bought new supply.
                 Time (s): {round(self.time, 2)}, Time (m): {round(self.time / 60, 2)}
@@ -138,7 +103,6 @@ class Game:
             self.buildings.append(Building(self.building_configs[building], building))
             self.minerals -= cost_min
             self.supply -= cost_sup
-            if self.save: self.history.append(("self.build", building))
             if self.show: print(f"""
                 Built new structure: {building}
                 Updated mineral balance: {self.minerals}
@@ -163,7 +127,6 @@ class Game:
 
     def skipm(self, minerals):
 
-        if self.save: self.history.append(("self.skipm", minerals))
         while round(minerals, 39) > 0:
             time = minerals / self.income_s
             minerals -= self.skip(time)[1]
@@ -182,7 +145,6 @@ class Game:
 
     def skipt(self, time):
 
-        if self.save: self.history.append(("self.skipt", time))
         while round(time, 39) > 0:
             time -= self.skip(time)[0]
 
