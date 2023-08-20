@@ -1,5 +1,6 @@
 import json
 import gym
+import numpy as np
 
 class Game:
     def __init__(self, show = True, history = [], auto_skip = True):
@@ -195,10 +196,11 @@ class Game:
         change = False
         for building in self.buildings:
             building.time += time_skip
-            if building.time == 0:
-                change = True
-                building.built =True
-                if self.show: print("Structure finished constructing: ", building.name)
+            if not building.built:
+                if building.time >= 0:
+                    change = True
+                    building.built =True
+                    if self.show: print("Structure finished constructing: ", building.name)
 
         self.time += time_skip
         self.minerals += mineral_skip
@@ -237,7 +239,7 @@ class Environment(gym.Env):
         }
 
     def reset(self, seed = None):
-        self.game = Game(show = True)
+        self.game = Game(show = False)
 
     def step(self, action):
         old_score = self.game.income_m
