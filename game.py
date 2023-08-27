@@ -17,7 +17,7 @@ class Building:
             self.built = False
 
 class Game:
-    def __init__(self, show = False, auto_skip = True, start_config = json.loads(open("start_config.json").read())):
+    def __init__(self, show = False, auto_skip = True, start_config = json.loads(open("start_config.json").read()), change_stop = False):
 
         self.time = 0
         self.minerals = 0
@@ -40,14 +40,21 @@ class Game:
 
         
         self.auto_skip = auto_skip
+        self.change_stop = change_stop
         self.show = show
 
     def calc_income(self):
 
         previous_income = self.income_m
 
-        self.nstructures_type0 = len([structure for structure in self.buildings if structure.type == 0])
-        self.nstructures_type1 = len([structure for structure in self.buildings if structure.type == 1])
+        structures_type0 = [structure for structure in self.buildings if structure.type == 0]
+        structures_type1 = [structure for structure in self.buildings if structure.type == 1]
+
+        self.nstructures_type0 = len(structures_type0)
+        self.nstructures_type1 = len(structures_type1)
+
+        self.building_type0 = sum([(structure.built - 1) * structure.time for structure in structures_type0])
+        self.building_type1 = sum([(structure.built - 1) * structure.time for structure in structures_type1])
 
         self.income_m = (
             self.start_config["income_flat"] + (self.nstructures_type1 + self.start_config["spawner_buff"]) * self.nstructures_type0
@@ -109,7 +116,7 @@ class Game:
             """)
             if self.auto_skip:
                 self.skipm(self.supply_cost - self.minerals)
-                self.buy_supply()
+                if not self.change_stop: self.buy_supply()
         
     def build(self, building):
         cost_min = self.building_configs[building]["cost_min"]
@@ -137,22 +144,25 @@ class Game:
                     self.buy_supply()
                 if self.minerals < cost_min:
                     self.skipm(cost_min - self.minerals)
-                self.build(building)
+                if not self.change_stop: self.build(building)
 
         if self.show: self.calc_ratio()
 
     def skipm(self, minerals):
 
-        while round(minerals, 39) > 0:
+        if self.change_stop:
             time = minerals / self.income_s
-            minerals -= self.skip(time)[1]
-            if self.show: print(f"""
-                Is skipping minerals.
-                Minerals left: {minerals}
-                Mineral balance: {round(self.minerals, 10)}
-            """) 
+            self.skip(time)
+        else:
+            while round(minerals, 39) > 0:
+                time = minerals / self.income_s
+                minerals -= self.skip(time)[1]
+                if self.show: print(f"""
+                    Is skipping minerals.
+                    Minerals left: {minerals}
+                    Mineral balance: {round(self.minerals, 10)}
+                """) 
 
-        
         if self.show: print(f"""
             Finished skipping.
             Current time: {round(self.time, 2)}
@@ -161,14 +171,17 @@ class Game:
 
     def skipt(self, time):
 
-        while round(time, 39) > 0:
-            time -= self.skip(time)[0]
+        if self.change_stop:
+            self.skip(time)
+        else:
+            while round(time, 39) > 0:
+                time -= self.skip(time)[0]
 
-        if self.show: print(f"""
-            Finished skipping.
-            Current time: {round(self.time, 2)}
-            Mineral balance: {round(self.minerals, 2)}
-            """)
+            if self.show: print(f"""
+                Finished skipping.
+                Current time: {round(self.time, 2)}
+                Mineral balance: {round(self.minerals, 2)}
+                """)
 
     def skip(self, time):
         time_skip = (
